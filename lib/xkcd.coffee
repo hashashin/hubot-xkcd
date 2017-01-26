@@ -13,22 +13,24 @@ url = 'https://xkcd.com'
 
 sendComic = (res, body) ->
   data = JSON.parse body
-  if robot.adapterName is "telegram"
-    robot.emit 'telegram:invoke', 'sendPhoto', {
-      chat_id: msg.envelope.room
-      photo: data.img
-    }, (error, response) ->
-      if error != null
-        robot.logger.error error
-      robot.logger.debug response
-  else
-    res.send data.title+" "+data.img+" "+data.alt
+  res.send data.title+" "+data.img+" "+data.alt
 
 module.exports = (robot) ->
   robot.respond /xkcd( current)?$/i, (res) ->
     robot.http("#{url}/info.0.json").get() (err, response, body) ->
       throw err if err
-      sendComic res, body
+      if robot.adapterName is "telegram"
+        data = JSON.parse body
+        robot.emit 'telegram:invoke', 'sendPhoto', {
+          chat_id: msg.envelope.room
+          photo: data.img
+        }, (error, response) ->
+          if error != null
+            robot.logger.error error
+          robot.logger.debug response
+      else
+        sendComic res, body
+
 
   robot.respond /xkcd random$/i, (res) ->
     robot.http("#{url}/info.0.json").get() (err, response, body) ->
@@ -36,11 +38,31 @@ module.exports = (robot) ->
       maxNum = JSON.parse(body).num
       randNum = res.random [1..maxNum]
       robot.http("#{url}/#{randNum}/info.0.json").get() (err, response, body) ->
-        sendComic res, body
+        if robot.adapterName is "telegram"
+          data = JSON.parse body
+          robot.emit 'telegram:invoke', 'sendPhoto', {
+            chat_id: msg.envelope.room
+            photo: data.img
+          }, (error, response) ->
+            if error != null
+              robot.logger.error error
+            robot.logger.debug response
+        else
+          sendComic res, body
 
   robot.respond /xkcd (\d+)/i, (res) ->
     robot.http("#{url}/#{res.match[1]}/info.0.json").get() (err, response, body) ->
       if response.statusCode is 404
         res.send 'This comic doesn\'t exist'
       else
-        sendComic res, body
+        if robot.adapterName is "telegram"
+          data = JSON.parse body
+          robot.emit 'telegram:invoke', 'sendPhoto', {
+            chat_id: msg.envelope.room
+            photo: data.img
+          }, (error, response) ->
+            if error != null
+              robot.logger.error error
+            robot.logger.debug response
+        else
+          sendComic res, body
