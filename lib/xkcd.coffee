@@ -13,7 +13,16 @@ url = 'https://xkcd.com'
 
 sendComic = (res, body) ->
   data = JSON.parse body
-  res.send data.title, data.img, data.alt
+  if robot.adapterName is "telegram"
+    robot.emit 'telegram:invoke', 'sendPhoto', {
+      chat_id: msg.envelope.room
+      photo: data.img
+    }, (error, response) ->
+      if error != null
+        robot.logger.error error
+      robot.logger.debug response
+  else
+    res.send data.title+" "+data.img+" "+data.alt
 
 module.exports = (robot) ->
   robot.respond /xkcd( current)?$/i, (res) ->
