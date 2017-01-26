@@ -22,7 +22,7 @@ module.exports = (robot) ->
       if robot.adapterName is "telegram"
         data = JSON.parse body
         robot.emit 'telegram:invoke', 'sendPhoto', {
-          chat_id: msg.envelope.room
+          chat_id: res.envelope.room
           photo: data.img
         }, (error, response) ->
           if error != null
@@ -41,7 +41,7 @@ module.exports = (robot) ->
         if robot.adapterName is "telegram"
           data = JSON.parse body
           robot.emit 'telegram:invoke', 'sendPhoto', {
-            chat_id: msg.envelope.room
+            chat_id: res.envelope.room
             photo: data.img
           }, (error, response) ->
             if error != null
@@ -58,7 +58,7 @@ module.exports = (robot) ->
         if robot.adapterName is "telegram"
           data = JSON.parse body
           robot.emit 'telegram:invoke', 'sendPhoto', {
-            chat_id: msg.envelope.room
+            chat_id: res.envelope.room
             photo: data.img
           }, (error, response) ->
             if error != null
